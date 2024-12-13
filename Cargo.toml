@@ -1,0 +1,6 @@
+[workspace]
+members = ["substreams/solana_minimal", "substreams/solana_specified_tokens"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
