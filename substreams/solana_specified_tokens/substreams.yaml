@@ -30,5 +30,5 @@ modules:
       type: proto:mydata.v1.Events
 
 params:
-  map_block: token_contract:orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE
+  map_block: orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE,MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac
   solana:transactions_by_programid_without_votes: program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA

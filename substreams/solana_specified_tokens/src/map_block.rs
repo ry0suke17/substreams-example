@@ -16,10 +16,14 @@ fn map_block(
     trxs: Transactions,
 ) -> Result<Events, substreams::errors::Error> {
     skip_empty_output();
-    let colon_index = params
-        .find(":")
-        .expect("Invalid params, must be of the form token_contract:<address>");
-    let token_contract = &params[colon_index + 1..];
+
+    let token_contracts: Vec<String> = params.split(',').map(|s| s.trim().to_string()).collect();
+
+    if token_contracts.is_empty() {
+        return Err(substreams::errors::Error::msg(
+            "Token contracts list is empty".to_string(),
+        ));
+    }
 
     let block_height = clock.number;
     let block_timestamp = clock
@@ -59,7 +63,7 @@ fn map_block(
                 .r#type
                 .as_ref()
                 .unwrap()
-                .is_for_token_contract(&confirmed_txn, &token_contract)
+                .is_for_token_contract(&confirmed_txn, token_contracts.clone())
             {
                 data.push(event);
             }
@@ -70,11 +74,11 @@ fn map_block(
 }
 
 impl Type {
-    fn is_for_token_contract(&self, trx: &ConfirmedTransaction, contract: &str) -> bool {
+    fn is_for_token_contract(&self, trx: &ConfirmedTransaction, contracts: Vec<String>) -> bool {
         match self {
             Type::Transfer(Transfer { accounts, .. }) => {
                 match &accounts.as_ref().unwrap().token_mint {
-                    Some(token_mint) => token_mint == contract,
+                    Some(token_mint) => contracts.contains(token_mint),
                     None => trx
                         .meta()
                         .unwrap()
@@ -84,19 +88,20 @@ impl Type {
                         .pre_token_balances
                         .iter()
                         .any(|token_balance| {
-                            token_balance.mint == contract || token_balance.owner == contract
+                            contracts.contains(&token_balance.mint)
+                                || contracts.contains(&token_balance.owner)
                         }),
                 }
             }
             Type::InitializeMint(InitializeMint { accounts, .. }) => {
-                accounts.as_ref().unwrap().mint == contract
+                contracts.contains(&accounts.as_ref().unwrap().mint)
             }
             Type::InitializeImmutableOwner(InitializeImmutableOwner { accounts: _, .. }) => {
                 // FIXME: How to filter that out?
                 false
             }
             Type::InitializeAccount(InitializeAccount { accounts, .. }) => {
-                accounts.as_ref().unwrap().mint == contract
+                contracts.contains(&accounts.as_ref().unwrap().mint)
             }
             Type::InitializeMultisig(InitializeMultisig { accounts: _, .. }) => {
                 // FIXME: How to filter that out?
@@ -106,7 +111,9 @@ impl Type {
                 // FIXME: How to filter that out?
                 false
             }
-            Type::MintTo(MintTo { accounts, .. }) => accounts.as_ref().unwrap().mint == contract,
+            Type::MintTo(MintTo { accounts, .. }) => {
+                contracts.contains(&accounts.as_ref().unwrap().mint)
+            }
             Type::Revoke(Revoke { accounts: _, .. }) => {
                 // FIXME: How to filter that out?
                 false
@@ -115,7 +122,9 @@ impl Type {
                 // FIXME: How to filter that out?
                 false
             }
-            Type::Burn(Burn { accounts, .. }) => accounts.as_ref().unwrap().mint == contract,
+            Type::Burn(Burn { accounts, .. }) => {
+                contracts.contains(&accounts.as_ref().unwrap().mint)
+            }
             Type::CloseAccount(CloseAccount { accounts: _, .. }) => {
                 // FIXME: How to filter that out?
                 false
