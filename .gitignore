@@ -1,11 +1,9 @@
 # Substreams Files
 
-**/data/
-**/*.spkg
-*.spkg
 **/sink
 **/debug.log
 **/replay.log
+**/.substreams.env
 
 # Created by https://www.toptal.com/developers/gitignore/api/rust,visualstudiocode,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=rust,visualstudiocode,macos

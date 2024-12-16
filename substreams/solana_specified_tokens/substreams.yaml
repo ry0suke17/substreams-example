@@ -1,6 +1,6 @@
 specVersion: v0.1.0
 package:
-  name: solana
+  name: solana_specified_tokens
   version: v0.1.0
 
 network: solana
@@ -11,20 +11,24 @@ protobuf:
   importPaths:
     - ./proto
 
+imports:
+  solana: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
 binaries:
   default:
-    type: wasm/rust-v1
-    file: target/wasm32-unknown-unknown/release/substreams.wasm
+    type: wasm/rust-v1+wasm-bindgen-shims
+    file: target/wasm32-unknown-unknown/release/solana_specified_tokens.wasm
 
 modules:
-  - name: map_solana_token_events
+  - name: map_block
     kind: map
-    initialBlock: 158558168
     inputs:
       - params: string
-      - source: sf.solana.type.v1.Block
+      - source: sf.substreams.v1.Clock
+      - map: solana:transactions_by_programid_without_votes
     output:
-      type: proto:data.types.v1.Output
+      type: proto:mydata.v1.Events
 
 params:
-  map_solana_token_events: "token_contract=Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB&token_decimals=6"
+  map_block: token_contract:orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE
+  solana:transactions_by_programid_without_votes: program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
