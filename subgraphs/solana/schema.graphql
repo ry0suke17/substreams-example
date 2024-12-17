@@ -1,0 +1,22 @@
+# schema.graphql
+type Transaction @entity {
+  id: ID!
+  blockNumber: Int!
+  timestamp: Int!
+  transfers: [Transfer!]! @derivedFrom(field: "transaction")
+}
+
+type Transfer @entity {
+  id: ID!
+  transaction: Transaction!
+  from: Account!
+  to: Account!
+  value: BigInt!
+}
+
+type Account @entity {
+  id: ID!
+  balance: BigInt!
+  transfersFrom: [Transfer!]! @derivedFrom(field: "from")
+  transfersTo: [Transfer!]! @derivedFrom(field: "to")
+}
