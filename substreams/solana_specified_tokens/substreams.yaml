@@ -3,7 +3,7 @@ package:
   name: solana_specified_tokens
   version: v0.1.0
 
-network: solana
+network: solana-mainnet-beta
 
 protobuf:
   files:
@@ -28,6 +28,7 @@ modules:
       - map: solana:transactions_by_programid_without_votes
     output:
       type: proto:mydata.v1.Events
+    initialBlock: 10
 
 params:
   map_block: orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE,MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac
