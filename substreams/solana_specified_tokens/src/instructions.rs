@@ -1,5 +1,6 @@
 use anyhow::anyhow;
 use spl_token::instruction::{AuthorityType as SplAuthorityType, TokenInstruction};
+use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::{block_view::InstructionView, Address};
 
 use crate::pb::mydata::v1::{
@@ -30,26 +31,81 @@ use crate::pb::mydata::v1::{
     SingleSignature, SyncNative, ThawAccount, Transfer,
 };
 
-impl TryFrom<(TokenInstruction<'_>, &InstructionView<'_>)> for Type {
+impl
+    TryFrom<(
+        TokenInstruction<'_>,
+        &InstructionView<'_>,
+        ConfirmedTransaction,
+    )> for Type
+{
     type Error = substreams::errors::Error;
 
-    fn try_from(value: (TokenInstruction<'_>, &InstructionView<'_>)) -> Result<Self, Self::Error> {
-        let (value, instruction_view) = value;
+    fn try_from(
+        value: (
+            TokenInstruction<'_>,
+            &InstructionView<'_>,
+            ConfirmedTransaction,
+        ),
+    ) -> Result<Self, Self::Error> {
+        let (value, instruction_view, trx) = value;
         let accounts = instruction_view.accounts();
 
         Ok(match value {
-            TokenInstruction::Transfer { amount } => Type::Transfer(Transfer {
-                instruction: Some(TransferInstruction {
-                    amount,
-                    decimals: None,
-                }),
-                accounts: Some(TransferAccounts {
-                    source: accounts.get(0).unwrap().to_string(),
-                    destination: accounts.get(1).unwrap().to_string(),
-                    signer: new_signer_at(&accounts, 2),
-                    token_mint: None,
-                }),
-            }),
+            TokenInstruction::Transfer { amount } => {
+                let resolved_accounts = trx.resolved_accounts();
+                let tx_meta = trx
+                    .meta
+                    .as_ref()
+                    .ok_or_else(|| anyhow!("Transaction metadata not found"))?;
+                let source = accounts
+                    .get(0)
+                    .ok_or_else(|| anyhow!("Source account not found"))?;
+                let destination = accounts
+                    .get(1)
+                    .ok_or_else(|| anyhow!("Destination account not found"))?;
+                let source_index = resolved_accounts
+                    .iter()
+                    .position(|account| account == source)
+                    .ok_or_else(|| anyhow!("Source account not found in resolved accounts"))?
+                    as u32;
+                let destination_index = resolved_accounts
+                    .iter()
+                    .position(|account| account == destination)
+                    .ok_or_else(|| anyhow!("Destination account not found in resolved accounts"))?
+                    as u32;
+                let relevant_balances: Vec<_> = tx_meta
+                    .post_token_balances
+                    .iter()
+                    .filter(|token_balance| {
+                        token_balance.account_index == source_index
+                            || token_balance.account_index == destination_index
+                    })
+                    .collect();
+                let source_balance = relevant_balances
+                    .iter()
+                    .find(|&b| b.account_index == source_index)
+                    .ok_or_else(|| anyhow!("Source balance not found"))?;
+                let destination_balance = relevant_balances
+                    .iter()
+                    .find(|&b| b.account_index == destination_index)
+                    .ok_or_else(|| anyhow!("Destination balance not found"))?;
+                if source_balance.mint != destination_balance.mint {
+                    return Err(anyhow!("Source and destination mint mismatch").into());
+                }
+
+                Type::Transfer(Transfer {
+                    instruction: Some(TransferInstruction {
+                        amount,
+                        decimals: None,
+                    }),
+                    accounts: Some(TransferAccounts {
+                        source: source.to_string(),
+                        destination: destination.to_string(),
+                        signer: new_signer_at(&accounts, 2),
+                        token_mint: Some(source_balance.mint.to_string()),
+                    }),
+                })
+            }
             TokenInstruction::InitializeMint {
                 mint_authority,
                 freeze_authority,

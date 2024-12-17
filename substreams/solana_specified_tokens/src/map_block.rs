@@ -47,17 +47,18 @@ fn map_block(
             let token_instruction =
                 spl_token::instruction::TokenInstruction::unpack(instruction.data())?;
 
-            let event = match Type::try_from((token_instruction, &instruction)) {
-                Ok(event_type) => Event {
-                    txn_id: tx_id.clone(),
-                    block_height,
-                    block_timestamp,
-                    block_hash: clock.id.clone(),
-                    instruction_index: i as u32,
-                    r#type: Some(event_type),
-                },
-                Err(_) => continue,
-            };
+            let event =
+                match Type::try_from((token_instruction, &instruction, confirmed_txn.clone())) {
+                    Ok(event_type) => Event {
+                        txn_id: tx_id.clone(),
+                        block_height,
+                        block_timestamp,
+                        block_hash: clock.id.clone(),
+                        instruction_index: i as u32,
+                        r#type: Some(event_type),
+                    },
+                    Err(_) => continue,
+                };
 
             if event
                 .r#type
@@ -87,10 +88,7 @@ impl Type {
                         .unwrap()
                         .pre_token_balances
                         .iter()
-                        .any(|token_balance| {
-                            contracts.contains(&token_balance.mint)
-                                || contracts.contains(&token_balance.owner)
-                        }),
+                        .any(|token_balance| contracts.contains(&token_balance.mint)),
                 }
             }
             Type::InitializeMint(InitializeMint { accounts, .. }) => {
