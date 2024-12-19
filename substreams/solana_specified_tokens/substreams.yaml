@@ -28,7 +28,7 @@ modules:
       - map: solana:transactions_by_programid_without_votes
     output:
       type: proto:mydata.v1.Events
-    initialBlock: 10
+    initialBlock: 260000082
 
 params:
   map_block: orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE,MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac

@@ -18,6 +18,10 @@ export function handleTriggers(bytes: Uint8Array): void {
         let to = getOrCreateAccount(accounts!.destination);
         let amount = BigInt.fromU64(instruction!.amount);
         recordTransfer(transaction, event.instructionIndex, from, to, amount);
+        from.balance = from.balance.minus(amount)
+        from.save()
+        to.balance = to.balance.plus(amount)
+        to.save()
       }
     }
   })

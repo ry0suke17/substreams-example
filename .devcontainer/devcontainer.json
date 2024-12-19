@@ -51,7 +51,6 @@
                 "rust-lang.rust-analyzer",
                 "vadimcn.vscode-lldb",
                 "ms-azuretools.vscode-docker",
-                "/workspace/.vscode/streamingfast.substreams/substreams-0.0.1.vsix",
                 "bufbuild.vscode-buf"
             ],
             "settings": {
