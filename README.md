@@ -17,6 +17,7 @@ cd substreams/solana
 substreams build
 
 # substreams auth
+
 cd -
 substreams auth
 
