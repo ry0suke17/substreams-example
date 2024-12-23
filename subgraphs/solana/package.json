@@ -1,14 +1,14 @@
 {
-  "name": "solana_specified_tokens",
+  "name": "solana",
   "license": "Apache-2.0",
   "scripts": {
     "generate": "npm run codegen && npm run protogen",
-    "deploy-local": "graph create --node http://localhost:8020/ solana_specified_tokens && graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 solana_specified_tokens --version-label=v0.0.1",
+    "deploy-local": "graph create --node http://localhost:8020/ solana && graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 solana --version-label=v0.0.1",
     "codegen": "graph codegen",
-    "protogen": "buf generate --type=\"mydata.v1.Events\" ../../substreams/solana_specified_tokens/solana-specified-tokens-v0.1.0.spkg#format=bin; echo ''; echo '^^^ You can safely ignore warnings about \"non-conform Protobuf generation specification\": they come from the assemblyscript buf plugin'; echo ''",
+    "protogen": "buf generate --type=\"mydata.v1.Events\" ../../substreams/solana/solana-v0.1.0.spkg#format=bin; echo ''; echo '^^^ You can safely ignore warnings about \"non-conform Protobuf generation specification\": they come from the assemblyscript buf plugin'; echo ''",
     "build": "graph build",
-    "remove-local": "graph remove --node http://localhost:8020/ solana_specified_tokens",
-    "deploy-studio": "graph deploy --node https://api.studio.thegraph.com/deploy/ solana_specified_tokens",
+    "remove-local": "graph remove --node http://localhost:8020/ solana",
+    "deploy-studio": "graph deploy --node https://api.studio.thegraph.com/deploy/ solana",
     "publish": "graph publish",
     "test": "graph test"
   },

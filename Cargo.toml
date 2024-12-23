@@ -1,5 +1,5 @@
 [workspace]
-members = ["substreams/solana_specified_tokens"]
+members = ["substreams/solana"]
 
 [workspace.package]
 version = "0.1.0"
