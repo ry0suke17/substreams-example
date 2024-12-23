@@ -16,9 +16,12 @@ Execute the following command to deploy subgraph on the graph-node.
 cd substreams/solana
 substreams build
 
+# substreams auth
+cd -
+substreams auth
+
 # subgraph deploy
 
-cd -
 cd subgraphs/solana
 npm run deploy-local
 ```
